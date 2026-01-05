@@ -1,0 +1,31 @@
+name: Build & Push Netflix Image to ECR Public
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: self-hosted
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Login to Amazon ECR Public
+      run: |
+        aws ecr-public get-login-password --region us-east-1 \
+        | docker login --username AWS --password-stdin public.ecr.aws
+
+    - name: Build Docker Image
+      run: docker build -t netflix .
+
+    - name: Tag Docker Image
+      run: |
+        docker tag netflix:latest public.ecr.aws/q8o0u3u8/netflix:latest
+
+    - name: Push Docker Image
+      run: |
+        docker push public.ecr.aws/q8o0u3u8/netflix:latest
+
